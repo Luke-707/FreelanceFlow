@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoices - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Invoices</h2>
+        <p class="text-muted">
+            {% if user.role == 'client' %}
+            Pay your invoices to unlock deliverables from freelancers.
+            {% else %}
+            Track payments from your clients here.
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="glass-card p-4">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Project</th>
+                            <th>Milestone</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Deliverable</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in invoices %}
+                        <tr>
+                            <td>{{ invoice.pk }}</td>
+                            <td><a href="{% url 'project_detail' invoice.project.pk %}">{{ invoice.project.title }}</a>
+                            </td>
+                            <td>{{ invoice.milestone.title }}</td>
+                            <td>${{ invoice.amount }}</td>
+                            <td><span class="badge badge-{{ invoice.status }}">{{ invoice.status|title }}</span></td>
+                            <td>{{ invoice.due_date|default:"-" }}</td>
+                            <td>
+                                {% if invoice.project.deliverable %}
+                                {% if invoice.project.deliverable_unlocked %}
+                                <span class="text-success small"><i class="bi bi-unlock me-1"></i>Unlocked</span>
+                                {% else %}
+                                <span class="text-warning small"><i class="bi bi-lock me-1"></i>Locked</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-muted small">Not uploaded</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if invoice.status == 'unpaid' %}
+                                {% if user.role == 'client' %}
+                                {% if invoice.payment_link %}
+                                <a href="{{ invoice.payment_link }}" target="_blank"
+                                    class="btn btn-sm btn-outline-primary mb-1 w-100">
+                                    <i class="bi bi-link-45deg me-1"></i> Pay Link
+                                </a>
+                                {% endif %}
+                                {% if invoice.payment_qr %}
+                                <button class="btn btn-sm btn-outline-info mb-1 w-100" data-bs-toggle="modal"
+                                    data-bs-target="#qrModal{{ invoice.pk }}">
+                                    <i class="bi bi-qr-code me-1"></i> View QR
+                                </button>
+                                <!-- QR Modal -->
+                                <div class="modal fade" id="qrModal{{ invoice.pk }}" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-sm text-center">
+                                        <div class="modal-content bg-dark border-secondary">
+                                            <div class="modal-header border-0 pb-0">
+                                                <button type="button" class="btn-close btn-close-white"
+                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <h6>Scan to Pay ${{ invoice.amount }}</h6>
+                                                <img src="{{ invoice.payment_qr.url }}" alt="Payment QR"
+                                                    class="img-fluid rounded mt-2 bg-white p-2">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                <form method="post" action="{% url 'mark_paid' invoice.pk %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-success w-100 mt-1">
+                                        <i class="bi bi-check2-circle me-1"></i> Mark as Paid
+                                    </button>
+                                </form>
+                                {% else %}
+                                <a href="{% url 'invoice_edit' invoice.pk %}"
+                                    class="btn btn-sm btn-outline-warning mb-1 w-100">
+                                    <i class="bi bi-pencil me-1"></i> Setup Payment
+                                </a>
+                                <span class="text-muted small d-block">Awaiting client</span>
+                                {% endif %}
+                                {% else %}
+                                <span class="text-success"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-4">No invoices found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

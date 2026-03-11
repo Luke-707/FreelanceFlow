@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm Payment - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="glass-card p-5 text-center">
+
+            <i class="bi bi-lock-fill text-warning" style="font-size: 3rem;"></i>
+            <h3 class="mt-3 mb-1">Unlock Your Deliverable</h3>
+            <p class="text-muted">Project: <strong>{{ project.title }}</strong></p>
+
+            {% if project.payment_amount %}
+            <div class="my-4">
+                <h1 class="text-success fw-bold">${{ project.payment_amount }}</h1>
+                <p class="text-muted small">Amount to pay to unlock your files</p>
+            </div>
+            {% endif %}
+
+            <!-- Payment Options -->
+            {% if project.payment_link or project.payment_qr %}
+            <div class="mb-4">
+                <p class="fw-semibold mb-3">Pay using one of the methods below, then confirm below:</p>
+                {% if project.payment_link %}
+                <a href="{{ project.payment_link }}" target="_blank" class="btn btn-outline-primary mb-2 w-100">
+                    <i class="bi bi-link-45deg me-1"></i> Pay via Link
+                </a>
+                {% endif %}
+                {% if project.payment_qr %}
+                <div class="mt-3">
+                    <p class="small text-muted mb-2">Or scan to pay:</p>
+                    <div class="d-inline-block bg-white p-3 rounded">
+                        <img src="{{ project.payment_qr.url }}" alt="QR Code" style="max-height:160px;">
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <hr>
+            {% endif %}
+
+            <!-- Confirm Payment Button -->
+            <p class="text-muted small mb-3">Once you've completed the payment, click the button below to unlock and download your deliverable.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-lg w-100">
+                    <i class="bi bi-unlock-fill me-2"></i> Pay to Unlock
+                </button>
+            </form>
+            <a href="{% url 'project_detail' project.pk %}" class="btn btn-outline-secondary mt-3 w-100">
+                <i class="bi bi-arrow-left me-1"></i> Back to Project
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

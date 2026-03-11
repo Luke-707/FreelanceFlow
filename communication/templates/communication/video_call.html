@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Video Call with {{ callee.username }} - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center h-100">
+    <div class="col-md-10">
+        <div class="glass-card p-4 text-center">
+            <h3 class="mb-4">Call with {{ callee.username }}</h3>
+
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-6 position-relative">
+                    <div class="bg-black rounded p-2"
+                        style="height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <video id="remoteVideo" autoplay playsinline
+                            style="width: 100%; height: 100%; object-fit: cover;"></video>
+                        <div id="status-msg" class="position-absolute text-white">Connecting...</div>
+                    </div>
+                    <p class="mt-2">Remote Video</p>
+                </div>
+                <div class="col-md-4 position-relative">
+                    <div class="bg-black rounded p-2"
+                        style="height: 200px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <video id="localVideo" autoplay playsinline muted
+                            style="width: 100%; height: 100%; object-fit: cover;"></video>
+                    </div>
+                    <p class="mt-2">My Video</p>
+                </div>
+            </div>
+
+            <div class="controls d-flex justify-content-center gap-3">
+                <button id="endCallBtn" class="btn btn-danger rounded-circle p-3" title="End Call">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                        class="bi bi-telephone-x-fill" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="row justify-content-center mt-3">
+                <button onclick="callPeer()" class="btn btn-success" style="width: 200px;">Start Call</button>
+            </div>
+
+            <div class="mt-3">
+                <small class="text-muted">Room ID: {{ room_id }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+<script>
+    const ROOM_ID = "{{ room_id }}";
+    const USER_ID = "{{ user.id }}";
+    const TARGET_ID = "{{ callee.id }}";
+    // Generate a peer ID deterministically so we know who to call
+    // Or just use random ID and room logic?
+    // PeerJS doesn't support 'rooms' natively without a specific server logic, 
+    // but we can simulate it by naming peers intentionally.
+    // e.g. 'freelance-flow-user-1'
+
+    // We'll use a deterministic ID for the peer: `ff_user_{id}`
+    const myPeerId = `ff_user_${USER_ID}`;
+    const targetPeerId = `ff_user_${TARGET_ID}`;
+
+    const localVideo = document.getElementById('localVideo');
+    const remoteVideo = document.getElementById('remoteVideo');
+    const statusMsg = document.getElementById('status-msg');
+    const endCallBtn = document.getElementById('endCallBtn');
+
+    let localStream;
+    let currentCall;
+
+    const peer = new Peer(myPeerId, {
+        debug: 2
+    });
+
+    peer.on('open', (id) => {
+        console.log('My peer ID is: ' + id);
+        statusMsg.innerText = "Waiting for connection...";
+        startLocalVideo();
+    });
+
+    peer.on('call', (call) => {
+        // Answer incoming call
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((stream) => {
+                localStream = stream;
+                localVideo.srcObject = stream;
+                call.answer(stream); // Answer the call with an A/V stream.
+                currentCall = call;
+
+                call.on('stream', (remoteStream) => {
+                    remoteVideo.srcObject = remoteStream;
+                    statusMsg.style.display = 'none';
+                });
+            })
+            .catch((err) => {
+                console.error('Failed to get local stream', err);
+            });
+    });
+
+    // Function to initiate call
+    function callPeer() {
+        if (!localStream) return;
+
+        statusMsg.innerText = "Calling " + TARGET_ID + "...";
+        const call = peer.call(targetPeerId, localStream);
+        currentCall = call;
+
+        call.on('stream', (remoteStream) => {
+            remoteVideo.srcObject = remoteStream;
+            statusMsg.style.display = 'none';
+        });
+
+        call.on('error', (err) => {
+            console.error(err);
+            statusMsg.innerText = "Call failed or rejected.";
+        });
+    }
+
+    function startLocalVideo() {
+        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+            .then((stream) => {
+                localStream = stream;
+                localVideo.srcObject = stream;
+
+                // If we are the 'caller' (logic: assume we try to call the other person automatically)
+                // Or better: try to connect. 
+                // However, standard PeerJS requires one to call the other.
+                // Simple logic: Both try to call? No, that causes issues.
+                // We pressed 'Video Call' button. So we are the initiator.
+                // But the other person needs to open the page too.
+                // Assuming the other person is also on the page.
+
+                // Let's verify who is the initiator. 
+                // Usually the one who clicked the link.
+                // But here both visit the link.
+
+                // Simplification for prototype:
+                // Check if we are the LOWER id? Or just try to call after 2 seconds.
+                // Better: Add a "Call" button? 
+                // The prompt says "Include call start, accept, reject...".
+                // So I should have a "Start Call" button inside the video page.
+
+                // I'll add a "Connect" button or just auto-connect if possible.
+                // Let's add a "Connect" button to be safe.
+
+                // Wait, I already have "End Call".
+                // I'll add a "Start Call" button too.
+
+            })
+            .catch((err) => {
+                console.error('Failed to get local stream', err);
+                statusMsg.innerText = "Camera access denied.";
+            });
+    }
+
+    endCallBtn.addEventListener('click', () => {
+        if (currentCall) currentCall.close();
+        if (localStream) localStream.getTracks().forEach(track => track.stop());
+        window.location.href = "{% url 'chat_detail' callee.id %}";
+    });
+
+</script>
+{% endblock %}

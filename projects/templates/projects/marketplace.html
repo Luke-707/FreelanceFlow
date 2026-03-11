@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Project Marketplace - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2><i class="bi bi-shop me-2"></i>Project Marketplace</h2>
+        <p class="text-muted">Browse open projects and submit your application to get started.</p>
+    </div>
+    {% if user.role == 'client' %}
+    <div class="col-md-4 text-end">
+        <a href="{% url 'project_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Post New Project
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for project in open_projects %}
+    <div class="col-md-4 mb-4">
+        <div class="glass-card p-4 h-100 position-relative">
+            <span class="badge bg-success position-absolute top-0 end-0 m-3">
+                <i class="bi bi-circle-fill me-1" style="font-size:0.5rem;"></i>Open
+            </span>
+
+            <h5 class="card-title mt-2">{{ project.title }}</h5>
+            <p class="card-text text-muted">{{ project.description|truncatewords:25 }}</p>
+
+            <div class="d-flex gap-3 mt-2 mb-3">
+                {% if project.budget %}
+                <small class="text-success"><i class="bi bi-cash me-1"></i>Budget: ${{ project.budget }}</small>
+                {% endif %}
+                {% if project.deadline %}
+                <small class="text-muted"><i class="bi bi-calendar me-1"></i>Due: {{ project.deadline }}</small>
+                {% endif %}
+            </div>
+
+            <small class="text-muted d-block mb-3">
+                <i class="bi bi-person me-1"></i>Client: {{ project.client.username }}
+            </small>
+
+            <div class="mt-auto">
+                {% if user.role == 'freelancer' %}
+                    {% if project.pk in user_applications %}
+                    <button class="btn btn-sm btn-outline-secondary w-100" disabled>
+                        <i class="bi bi-check-circle me-1"></i> Applied
+                    </button>
+                    {% else %}
+                    <a href="{% url 'apply_to_project' project.pk %}" class="btn btn-sm btn-primary w-100">
+                        <i class="bi bi-send me-1"></i> Apply Now
+                    </a>
+                    {% endif %}
+                {% elif user.role == 'client' and user == project.client %}
+                <a href="{% url 'project_detail' project.pk %}" class="btn btn-sm btn-outline-primary w-100">
+                    <i class="bi bi-eye me-1"></i> View Applications
+                </a>
+                {% else %}
+                <a href="{% url 'project_detail' project.pk %}" class="btn btn-sm btn-outline-secondary w-100">
+                    <i class="bi bi-info-circle me-1"></i> View Details
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center mt-5">
+        <div class="glass-card p-5">
+            <i class="bi bi-shop" style="font-size:3rem;opacity:0.4"></i>
+            <p class="mt-3 text-muted">No open projects available right now. Check back soon!</p>
+            {% if user.role == 'client' %}
+            <a href="{% url 'project_create' %}" class="btn btn-primary mt-2">
+                <i class="bi bi-plus-circle me-1"></i> Post the first project!
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

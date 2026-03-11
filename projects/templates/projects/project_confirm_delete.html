@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Project - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="glass-card p-5 text-center">
+            <i class="bi bi-exclamation-triangle-fill text-danger" style="font-size:3rem"></i>
+            <h3 class="mt-3">Delete "{{ project.title }}"?</h3>
+            <p class="text-muted">This action cannot be undone.</p>
+            <form method="post" class="d-flex gap-3 justify-content-center mt-4">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                <a href="{% url 'project_detail' project.pk %}" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

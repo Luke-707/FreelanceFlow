@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Post New Project - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="glass-card p-5">
+            <h2 class="mb-1"><i class="bi bi-briefcase me-2"></i>Post a New Project</h2>
+            <p class="text-muted mb-4">Describe your project and set a budget. Freelancers from the marketplace will apply, and you can choose the best fit.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                    <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <div class="form-text text-muted">{{ field.help_text }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-send me-1"></i> Post Project
+                    </button>
+                    <a href="{% url 'project_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

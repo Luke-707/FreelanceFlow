@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Set Payment Details - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="glass-card p-4">
+            <h3 class="mb-1"><i class="bi bi-credit-card me-2"></i>Set Payment Details</h3>
+            <p class="text-muted mb-4">
+                For project: <strong>{{ project.title }}</strong><br>
+                Set the amount the client must pay and optionally provide a payment link or QR code.
+            </p>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Payment Amount ($) <span class="text-danger">*</span></label>
+                    {{ form.payment_amount }}
+                    <small class="text-muted">This is the amount your client will be asked to pay.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Payment Link <small class="text-muted">(Optional)</small></label>
+                    {{ form.payment_link }}
+                    <small class="text-muted">e.g. PayPal, Stripe, or any payment URL.</small>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Payment QR Code <small class="text-muted">(Optional)</small></label>
+                    {{ form.payment_qr }}
+                    <small class="text-muted">Upload a QR code image the client can scan to pay.</small>
+                    {% if project.payment_qr %}
+                    <div class="mt-2">
+                        <small class="text-success"><i class="bi bi-check-circle me-1"></i>QR code already uploaded</small>
+                        <img src="{{ project.payment_qr.url }}" alt="Current QR" class="d-block mt-1 bg-white p-1 rounded" style="max-height:80px;">
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save me-1"></i> Save Payment Details
+                    </button>
+                    <a href="{% url 'project_detail' project.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

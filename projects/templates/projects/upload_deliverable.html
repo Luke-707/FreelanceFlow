@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Deliverable - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="glass-card p-5">
+            <h2 class="mb-1"><i class="bi bi-cloud-upload me-2"></i>Upload Deliverable</h2>
+            <p class="text-muted mb-4">Project: <strong>{{ project.title }}</strong></p>
+
+            <div class="alert alert-info small">
+                <i class="bi bi-info-circle me-1"></i>
+                The client will only be able to download this file <strong>after they pay the full amount</strong>.
+            </div>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Deliverable File</label>
+                    {{ form.deliverable }}
+                    <div class="form-text text-muted">Upload your final deliverable (zip, pdf, etc.)</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Notes for Client</label>
+                    {{ form.deliverable_note }}
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-cloud-upload me-1"></i> Upload & Mark Completed
+                    </button>
+                    <a href="{% url 'project_detail' project.pk %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

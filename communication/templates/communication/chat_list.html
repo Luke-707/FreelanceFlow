@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load communication_tags %}
+
+{% block title %}Messages - FreelanceFlow{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="glass-card p-3 h-100">
+            <h4 class="mb-3">Chats</h4>
+            <div class="list-group list-group-flush">
+                {% for user_item in users %}
+                <a href="{% url 'chat_detail' user_item.pk %}"
+                    class="list-group-item list-group-item-action bg-transparent text-white border-bottom border-secondary">
+                    <div class="d-flex w-100 justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">{{ user_item.username }}</h5>
+                            <small class="text-muted">{{ user_item.role|title }}</small>
+                        </div>
+                        {% with unread=user_unread|get_item:user_item.id %}
+                        {% if unread and unread > 0 %}
+                        <span class="badge rounded-pill bg-danger ms-2">{{ unread }}</span>
+                        {% endif %}
+                        {% endwith %}
+                    </div>
+                </a>
+                {% empty %}
+                <p>No contacts found.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="glass-card p-5 text-center d-flex flex-column justify-content-center h-100">
+            <h3>Select a conversation</h3>
+            <p class="text-muted">Choose a contact from the left to start messaging.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
