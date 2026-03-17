@@ -23,6 +23,9 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 # Copy project files
 COPY . /app/
 
+# Ensure necessary directories exist and have permissions
+RUN mkdir -p /app/db_data /app/staticfiles && chmod 777 /app/db_data /app/staticfiles
+
 # Expose the Django port
 EXPOSE 8000
 

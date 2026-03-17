@@ -106,9 +106,14 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/freelanceflow:latest
             docker compose up -d
 
+            # Wait for container to be ready
+            echo "Waiting for services to settle..."
+            sleep 10
+
             # 5. Run migrations and collect static files
-            docker compose exec -T web python manage.py migrate --noinput
-            docker compose exec -T web python manage.py collectstatic --noinput
+            # Using 'run' ensures the task completes even if the main service restarts
+            docker compose run --rm web python manage.py migrate --noinput
+            docker compose run --rm web python manage.py collectstatic --noinput
             
             # 6. Clean up old images
             docker image prune -f
