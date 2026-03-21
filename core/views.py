@@ -23,9 +23,12 @@ def dashboard(request):
     paid_invoices = invoices.filter(status='paid')
     pending_invoices = invoices.filter(status='unpaid')
     
-    context['total_earnings'] = paid_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+    paid_total = paid_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
+    context['total_earnings'] = paid_total   # used for both roles in template
     context['pending_payments'] = pending_invoices.aggregate(Sum('amount'))['amount__sum'] or 0
     
     context['recent_projects'] = projects.order_by('-created_at')[:5]
+    context['recent_payments'] = paid_invoices.select_related('project', 'milestone').order_by('-paid_at')[:5]
+    context['total_paid_invoices_count'] = paid_invoices.count()
     
     return render(request, 'core/dashboard.html', context)

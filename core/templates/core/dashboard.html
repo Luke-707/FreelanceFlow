@@ -12,6 +12,7 @@
     </div>
 </div>
 
+<!-- Stat Cards -->
 <div class="row g-4 mb-5">
     <div class="col-md-3">
         <div class="glass-card p-4 h-100 text-center">
@@ -33,13 +34,19 @@
     </div>
     <div class="col-md-3">
         <div class="glass-card p-4 h-100 text-center">
-            <h3 class="text-warning">${{ pending_payments }}</h3>
-            <p class="text-muted mb-0">Pending Payments</p>
+            {% if user.role == 'freelancer' %}
+            <h3 class="text-success">${{ total_earnings }}</h3>
+            <p class="text-muted mb-0">Total Earnings</p>
+            {% else %}
+            <h3 class="text-warning">${{ total_earnings }}</h3>
+            <p class="text-muted mb-0">Total Spent</p>
+            {% endif %}
         </div>
     </div>
 </div>
 
 <div class="row">
+    <!-- Left: Recent Projects + Recent Payments -->
     <div class="col-md-8">
         <div class="glass-card p-4 mb-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -73,7 +80,57 @@
                 </table>
             </div>
         </div>
+
+        <!-- Recent Payments block -->
+        <div class="glass-card p-4 mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="mb-0">
+                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                    Recent Payments
+                </h4>
+                <a href="{% url 'invoice_list' %}" class="btn btn-sm btn-outline-success">View All</a>
+            </div>
+            {% if recent_payments %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Project</th>
+                            <th>Milestone</th>
+                            <th>Amount</th>
+                            <th>Paid On</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for invoice in recent_payments %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'project_detail' invoice.project.pk %}">{{ invoice.project.title }}</a>
+                            </td>
+                            <td>{{ invoice.milestone.title }}</td>
+                            <td class="text-success fw-bold">${{ invoice.amount }}</td>
+                            <td class="text-muted small">
+                                {% if invoice.paid_at %}
+                                    {{ invoice.paid_at|date:"d M Y, H:i" }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">
+                <i class="bi bi-receipt me-1"></i>
+                {% if user.role == 'client' %}No payments made yet.{% else %}No payments received yet.{% endif %}
+            </p>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Right: Quick Actions + Earnings Summary -->
     <div class="col-md-4">
         <div class="glass-card p-4 mb-4">
             <h4 class="mb-3">Quick Actions</h4>
@@ -91,16 +148,29 @@
                     <i class="bi bi-chat me-1"></i> Messages
                 </a>
                 <a href="{% url 'invoice_list' %}" class="btn btn-outline-light">
-                    <i class="bi bi-receipt me-1"></i> View Invoices
+                    <i class="bi bi-receipt me-1"></i> Invoices & Payments
                 </a>
             </div>
         </div>
-        <div class="glass-card p-4">
+
+        <!-- Earnings / Spend Summary Card -->
+        <div class="glass-card p-4 mb-4">
             <h4 class="mb-3">
-                {% if user.role == 'freelancer' %}Total Earnings{% else %}Total Spent{% endif %}
+                {% if user.role == 'freelancer' %}
+                    <i class="bi bi-wallet2 text-success me-2"></i>Total Earnings
+                {% else %}
+                    <i class="bi bi-credit-card text-warning me-2"></i>Total Spent
+                {% endif %}
             </h4>
-            <h2 class="text-success">${{ total_earnings }}</h2>
-            <p class="text-muted small">From paid invoices</p>
+            <h2 class="{% if user.role == 'freelancer' %}text-success{% else %}text-warning{% endif %}">${{ total_earnings }}</h2>
+            <p class="text-muted small mb-1">From {{ total_paid_invoices_count }} paid invoice{{ total_paid_invoices_count|pluralize }}</p>
+            {% if pending_payments > 0 %}
+            <hr class="border-secondary">
+            <p class="text-warning small mb-0">
+                <i class="bi bi-clock me-1"></i>
+                ${{ pending_payments }} pending
+            </p>
+            {% endif %}
         </div>
     </div>
 </div>
