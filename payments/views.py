@@ -91,7 +91,7 @@ def mark_paid(request, pk):
     else:
         messages.success(
             request,
-            f'✅ Payment of ${project.budget} for "{project.title}" confirmed!'
+            f'✅ Payment of ₹{project.budget} for "{project.title}" confirmed!'
         )
 
     return redirect('invoice_list')

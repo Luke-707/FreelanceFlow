@@ -31,7 +31,7 @@ class ProjectApplicationForm(forms.ModelForm):
         fields = ['cover_letter', 'proposed_rate', 'portfolio_file']
         widgets = {
             'cover_letter': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Briefly explain why you are a great fit for this project...', 'class': 'form-control'}),
-            'proposed_rate': forms.NumberInput(attrs={'placeholder': 'Your proposed rate ($)', 'class': 'form-control'}),
+            'proposed_rate': forms.NumberInput(attrs={'placeholder': 'Your proposed rate (₹)', 'class': 'form-control'}),
             'portfolio_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
@@ -43,7 +43,7 @@ class PaymentSetupForm(forms.ModelForm):
         model = Project
         fields = ['payment_amount', 'payment_link', 'payment_qr']
         widgets = {
-            'payment_amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount to charge client ($)', 'step': '0.01'}),
+            'payment_amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount to charge client (₹)', 'step': '0.01'}),
             'payment_link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'Payment link (e.g. PayPal, Stripe)'}),
             'payment_qr': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }

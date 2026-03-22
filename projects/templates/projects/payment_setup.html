@@ -14,7 +14,7 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="mb-3">
-                    <label class="form-label fw-semibold">Payment Amount ($) <span class="text-danger">*</span></label>
+                    <label class="form-label fw-semibold">Payment Amount (₹) <span class="text-danger">*</span></label>
                     {{ form.payment_amount }}
                     <small class="text-muted">This is the amount your client will be asked to pay.</small>
                 </div>

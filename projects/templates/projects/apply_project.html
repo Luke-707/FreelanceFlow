@@ -10,7 +10,7 @@
             <h5 class="mb-1">{{ project.title }}</h5>
             <p class="text-muted small mb-2">Posted by {{ project.client.username }}</p>
             {% if project.budget %}
-            <span class="badge bg-success me-2"><i class="bi bi-cash me-1"></i>Budget: ${{ project.budget }}</span>
+            <span class="badge bg-success me-2"><i class="bi bi-cash me-1"></i>Budget: ₹{{ project.budget }}</span>
             {% endif %}
             {% if project.deadline %}
             <span class="badge bg-secondary"><i class="bi bi-calendar me-1"></i>Deadline: {{ project.deadline }}</span>
@@ -30,7 +30,7 @@
                     <small class="text-muted">Tell the client why you're the best fit for this project.</small>
                 </div>
                 <div class="mb-4">
-                    <label class="form-label fw-semibold">Proposed Rate ($)</label>
+                    <label class="form-label fw-semibold">Proposed Rate (₹)</label>
                     {{ form.proposed_rate }}
                     <small class="text-muted">How much do you want to charge for this project?</small>
                 </div>

@@ -24,7 +24,7 @@
         <div class="glass-card p-3 text-center">
             <h4 class="text-warning mb-1">{{ unpaid_invoices|length }}</h4>
             <p class="text-muted small mb-1">Pending Invoices</p>
-            <p class="text-warning fw-bold mb-0">${{ pending_total }}</p>
+            <p class="text-warning fw-bold mb-0">₹{{ pending_total }}</p>
         </div>
     </div>
     <div class="col-md-4">
@@ -33,13 +33,13 @@
             <p class="text-muted small mb-1">Payments {{ user.role|yesno:",Received,Made" }}
                 {% if user.role == 'client' %}Made{% else %}Received{% endif %}
             </p>
-            <p class="text-success fw-bold mb-0">${{ paid_total }}</p>
+            <p class="text-success fw-bold mb-0">₹{{ paid_total }}</p>
         </div>
     </div>
     <div class="col-md-4">
         <div class="glass-card p-3 text-center">
             <h4 class="{% if user.role == 'freelancer' %}text-success{% else %}text-warning{% endif %} mb-1">
-                ${{ paid_total }}
+                ₹{{ paid_total }}
             </h4>
             <p class="text-muted small mb-0">
                 {% if user.role == 'freelancer' %}Total Earned{% else %}Total Spent{% endif %}
@@ -100,7 +100,7 @@
                                 <a href="{% url 'project_detail' invoice.project.pk %}">{{ invoice.project.title }}</a>
                             </td>
                             <td>-</td>
-                            <td class="fw-bold">${{ invoice.project.budget }}</td>
+                            <td class="fw-bold">₹{{ invoice.project.budget }}</td>
                             <td>
                                 <span class="badge badge-{{ invoice.status }}">{{ invoice.status|title }}</span>
                             </td>
@@ -139,7 +139,7 @@
                                                         data-bs-dismiss="modal" aria-label="Close"></button>
                                                 </div>
                                                 <div class="modal-body">
-                                                    <h6>Scan to Pay ${{ invoice.project.budget }}</h6>
+                                                    <h6>Scan to Pay ₹{{ invoice.project.budget }}</h6>
                                                     <img src="{{ invoice.payment_qr.url }}" alt="Payment QR"
                                                         class="img-fluid rounded mt-2 bg-white p-2">
                                                 </div>
@@ -201,7 +201,7 @@
                                 <a href="{% url 'project_detail' invoice.project.pk %}">{{ invoice.project.title }}</a>
                             </td>
                             <td>-</td>
-                            <td class="text-success fw-bold">${{ invoice.project.budget }}</td>
+                            <td class="text-success fw-bold">₹{{ invoice.project.budget }}</td>
                             <td class="text-muted small">
                                 {% if invoice.paid_at %}
                                 <i class="bi bi-calendar-check me-1 text-success"></i>
@@ -230,7 +230,7 @@
                                 {% if user.role == 'freelancer' %}Total Earned:{% else %}Total Spent:{% endif %}
                             </td>
                             <td class="{% if user.role == 'freelancer' %}text-success{% else %}text-warning{% endif %}">
-                                ${{ paid_total }}
+                                ₹{{ paid_total }}
                             </td>
                             <td colspan="2"></td>
                         </tr>
