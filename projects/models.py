@@ -68,13 +68,13 @@ class Project(models.Model):
 
     @property
     def total_earnings(self):
-        return sum(m.amount for m in self.milestones.all())
+        return self.budget or 0
 
     @property
     def total_paid(self):
-        return sum(
-            inv.amount for inv in self.invoices.filter(status='paid')
-        )
+        if self.invoices.filter(status='paid').exists():
+            return self.budget or 0
+        return 0
 
     @property
     def is_fully_paid(self):
@@ -89,7 +89,6 @@ class Milestone(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='milestones')
     title = models.CharField(max_length=200)
     due_date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
 
     def __str__(self):
@@ -112,6 +111,11 @@ class ProjectApplication(models.Model):
     )
     cover_letter = models.TextField(blank=True, help_text="A brief message about why you want this project")
     proposed_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Your proposed rate for this project")
+    portfolio_file = models.FileField(
+        upload_to='portfolios/',
+        null=True, blank=True,
+        help_text="Attach a portfolio, resume, or work sample (PDF, DOC, image, ZIP, etc.)"
+    )
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -120,3 +124,17 @@ class ProjectApplication(models.Model):
 
     def __str__(self):
         return f"{self.freelancer.username} → {self.project.title}"
+
+
+class ProjectImage(models.Model):
+    """Multiple preview images per project, uploaded by the freelancer."""
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='preview_images')
+    image = models.ImageField(upload_to='previews/')
+    caption = models.CharField(max_length=200, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['uploaded_at']
+
+    def __str__(self):
+        return f"Preview for {self.project.title}"

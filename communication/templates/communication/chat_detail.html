@@ -119,6 +119,32 @@
             <div class="chat-container flex-grow-1" id="chat-box">
                 {% for message in chat_messages %}
                 <div class="message-bubble {% if message.sender == user %}sent{% else %}received{% endif %}">
+                    {% if message.attachment %}
+                        {% if message.is_image_attachment %}
+                        <div class="mb-2">
+                            <img src="{{ message.attachment.url }}" alt="Attachment" class="img-fluid rounded" style="max-height: 200px;">
+                        </div>
+                        {% else %}
+                        <div class="mb-2">
+                            <a href="{{ message.attachment.url }}" target="_blank" class="btn btn-sm btn-light">
+                                <i class="bi bi-paperclip me-1"></i> Download Attachment
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endif %}
+                    {% for att in message.attachments.all %}
+                        {% if att.is_image %}
+                        <div class="mb-2">
+                            <img src="{{ att.file.url }}" alt="Attachment" class="img-fluid rounded" style="max-height: 200px;">
+                        </div>
+                        {% else %}
+                        <div class="mb-2">
+                            <a href="{{ att.file.url }}" target="_blank" class="btn btn-sm btn-light">
+                                <i class="bi bi-paperclip me-1"></i> Download {{ att.file.name|slice:"17:" }}
+                            </a>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
                     <div class="text-break">{{ message.content }}</div>
                     <span class="message-time">{{ message.timestamp|date:"M d, H:i" }}</span>
                 </div>
@@ -132,13 +158,16 @@
 
             <!-- Input Area -->
             <div class="chat-footer">
-                <form method="post" class="d-flex gap-2 align-items-center mb-0">
+                <form method="post" enctype="multipart/form-data" class="d-flex gap-2 align-items-center mb-0">
                     {% csrf_token %}
-                    <div class="flex-grow-1">
+                    <div class="flex-grow-1 position-relative">
                         {{ form.content }}
                     </div>
+                    <div>
+                        <input type="file" name="attachments" class="form-control" multiple title="Attach files" aria-label="Upload attachments">
+                    </div>
                     <button type="submit" class="btn btn-primary btn-send shadow-sm" title="Send message">
-                        <i class="bi bi-send-fill ms-1"></i>
+                        <i class="bi bi-send-fill mt-1 ms-1"></i>
                     </button>
                 </form>
             </div>

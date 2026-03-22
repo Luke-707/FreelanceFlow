@@ -9,8 +9,6 @@ class Invoice(models.Model):
         ('overdue', 'Overdue'),
     )
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='invoices')
-    milestone = models.OneToOneField(Milestone, on_delete=models.CASCADE, related_name='invoice')
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='unpaid')
     issued_date = models.DateField(auto_now_add=True)
     due_date = models.DateField(null=True, blank=True)

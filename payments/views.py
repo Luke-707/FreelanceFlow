@@ -20,10 +20,10 @@ class InvoiceListView(LoginRequiredMixin, ListView):
         if user.role == 'freelancer':
             return Invoice.objects.filter(
                 project__freelancer=user
-            ).select_related('project', 'milestone').order_by('-issued_date')
+            ).select_related('project').order_by('-issued_date')
         return Invoice.objects.filter(
             project__client=user
-        ).select_related('project', 'milestone').order_by('-issued_date')
+        ).select_related('project').order_by('-issued_date')
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
@@ -32,8 +32,12 @@ class InvoiceListView(LoginRequiredMixin, ListView):
         paid_qs = all_invoices.filter(status='paid').order_by('-paid_at')
         ctx['unpaid_invoices'] = unpaid_qs
         ctx['paid_invoices'] = paid_qs
-        ctx['paid_total'] = paid_qs.aggregate(Sum('amount'))['amount__sum'] or 0
-        ctx['pending_total'] = unpaid_qs.aggregate(Sum('amount'))['amount__sum'] or 0
+        from projects.models import Project
+        paid_project_ids = paid_qs.values_list('project_id', flat=True).distinct()
+        ctx['paid_total'] = Project.objects.filter(id__in=paid_project_ids).aggregate(Sum('budget'))['budget__sum'] or 0
+
+        pending_project_ids = unpaid_qs.values_list('project_id', flat=True).distinct()
+        ctx['pending_total'] = Project.objects.filter(id__in=pending_project_ids).aggregate(Sum('budget'))['budget__sum'] or 0
         return ctx
 
 
@@ -74,8 +78,6 @@ def mark_paid(request, pk):
     # Mark invoice as paid with timestamp
     invoice.status = 'paid'
     invoice.paid_at = timezone.now()
-    invoice.milestone.status = 'completed'
-    invoice.milestone.save()
     invoice.save()
 
     # Check if ALL invoices for this project are now paid → unlock deliverable
@@ -89,7 +91,7 @@ def mark_paid(request, pk):
     else:
         messages.success(
             request,
-            f'✅ Payment of ${invoice.amount} for "{invoice.milestone.title}" confirmed!'
+            f'✅ Payment of ${project.budget} for "{project.title}" confirmed!'
         )
 
     return redirect('invoice_list')

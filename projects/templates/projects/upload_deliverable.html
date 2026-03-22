@@ -25,6 +25,11 @@
                     <label class="form-label fw-semibold">Notes for Client</label>
                     {{ form.deliverable_note }}
                 </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Preview Images (Optional)</label>
+                    <input type="file" name="preview_images" class="form-control" multiple accept="image/*">
+                    <div class="form-text text-muted">Upload one or more images so the client can preview the work before paying.</div>
+                </div>
                 <div class="d-flex gap-2">
                     <button type="submit" class="btn btn-primary">
                         <i class="bi bi-cloud-upload me-1"></i> Upload & Mark Completed

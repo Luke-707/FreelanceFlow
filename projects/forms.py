@@ -1,5 +1,5 @@
 from django import forms
-from .models import Project, Milestone, ProjectApplication
+from .models import Project, Milestone, ProjectApplication, ProjectImage
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -28,10 +28,11 @@ class ProjectApplicationForm(forms.ModelForm):
 
     class Meta:
         model = ProjectApplication
-        fields = ['cover_letter', 'proposed_rate']
+        fields = ['cover_letter', 'proposed_rate', 'portfolio_file']
         widgets = {
             'cover_letter': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Briefly explain why you are a great fit for this project...', 'class': 'form-control'}),
             'proposed_rate': forms.NumberInput(attrs={'placeholder': 'Your proposed rate ($)', 'class': 'form-control'}),
+            'portfolio_file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
         }
 
 
@@ -67,11 +68,20 @@ class DeliverableUploadForm(forms.ModelForm):
 class MilestoneForm(forms.ModelForm):
     class Meta:
         model = Milestone
-        fields = ['title', 'due_date', 'amount', 'status']
+        fields = ['title', 'due_date', 'status']
         widgets = {
             'due_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'title': forms.TextInput(attrs={'class': 'form-control'}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
         }
 
+
+class ProjectImageForm(forms.ModelForm):
+    """Form for uploading a single preview image."""
+    class Meta:
+        model = ProjectImage
+        fields = ['image', 'caption']
+        widgets = {
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Optional caption for this image'}),
+        }

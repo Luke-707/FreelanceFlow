@@ -92,6 +92,13 @@
                         {% if app.cover_letter %}
                         <p class="text-muted small mt-2 mb-0">{{ app.cover_letter }}</p>
                         {% endif %}
+                        {% if app.portfolio_file %}
+                        <div class="mt-2">
+                            <a href="{{ app.portfolio_file.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-paperclip me-1"></i> View Portfolio / Resume
+                            </a>
+                        </div>
+                        {% endif %}
                     </div>
                     {% if app.status == 'pending' %}
                     <div class="d-flex gap-2 ms-3 flex-shrink-0">
@@ -141,7 +148,6 @@
                             <div class="col-md-6">{{ milestone_form.title.label_tag }}{{ milestone_form.title }}</div>
                             <div class="col-md-6">{{ milestone_form.due_date.label_tag }}{{ milestone_form.due_date }}
                             </div>
-                            <div class="col-md-6">{{ milestone_form.amount.label_tag }}{{ milestone_form.amount }}</div>
                             <div class="col-md-6">{{ milestone_form.status.label_tag }}{{ milestone_form.status }}</div>
                         </div>
                         <button type="submit" class="btn btn-success btn-sm mt-3">Save Milestone</button>
@@ -164,7 +170,6 @@
                         </small>
                     </div>
                     <div>
-                        <span class="badge bg-secondary">${{ milestone.amount }}</span>
                         {% if milestone.invoice %}
                         <a href="{% url 'invoice_list' %}" class="badge badge-{{ milestone.invoice.status }} ms-2">
                             Inv: {{ milestone.invoice.status|title }}
@@ -267,13 +272,18 @@
             </div>
             {% else %}
 
-            {% if project.preview_image or project.preview_link %}
+            {% if project.preview_images.exists or project.preview_image or project.preview_link %}
             <div class="mb-4">
                 <h5>Product Preview</h5>
-                {% if project.preview_image %}
-                <img src="{{ project.preview_image.url }}" alt="Preview"
-                    class="img-fluid rounded border border-secondary mb-2" style="max-height: 400px;">
-                {% endif %}
+                <div class="d-flex flex-wrap gap-2">
+                    {% if project.preview_image %}
+                    <img src="{{ project.preview_image.url }}" alt="Preview"
+                        class="img-fluid rounded border border-secondary mb-2" style="max-height: 400px;">
+                    {% endif %}
+                    {% for p_img in project.preview_images.all %}
+                    <img src="{{ p_img.image.url }}" alt="Preview" class="img-fluid rounded border border-secondary mb-2" style="max-height: 200px; object-fit: cover;">
+                    {% endfor %}
+                </div>
                 {% if project.preview_link %}
                 <br>
                 <a href="{{ project.preview_link }}" target="_blank" class="btn btn-sm btn-outline-info">

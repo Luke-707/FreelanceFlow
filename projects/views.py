@@ -73,7 +73,7 @@ def apply_to_project(request, pk):
         return redirect('project_marketplace')
 
     if request.method == 'POST':
-        form = ProjectApplicationForm(request.POST)
+        form = ProjectApplicationForm(request.POST, request.FILES)
         if form.is_valid():
             application = form.save(commit=False)
             application.project = project
@@ -195,6 +195,8 @@ def project_respond(request, pk, response):
         project.freelancer_status = 'accepted'
         project.status = 'ongoing'
         project.save()
+        from payments.models import Invoice
+        Invoice.objects.get_or_create(project=project, defaults={'status': 'unpaid'})
         messages.success(request, f'You accepted "{project.title}". Go build something awesome!')
     elif response == 'reject':
         project.freelancer_status = 'rejected'
@@ -253,6 +255,26 @@ def pay_to_unlock(request, pk):
     if request.method == 'POST':
         project.deliverable_unlocked = True
         project.save()
+        
+        # Mark all pending invoices as paid OR create one if client bypassed milestones
+        from django.utils import timezone
+        from payments.models import Invoice
+
+        unpaid_invoices = Invoice.objects.filter(project=project, status__in=['unpaid', 'overdue'])
+        
+        if unpaid_invoices.exists():
+            for invoice in unpaid_invoices:
+                invoice.status = 'paid'
+                invoice.paid_at = timezone.now()
+                invoice.save()
+        else:
+            # Client paid, but no invoices existed! We force create one
+            invoice = Invoice.objects.create(
+                project=project,
+                status='paid',
+                paid_at=timezone.now()
+            )
+
         messages.success(request, f'🎉 Payment confirmed! The deliverable for "{project.title}" is now unlocked — you can download it!')
         return redirect('project_detail', pk=pk)
 
@@ -281,6 +303,12 @@ def upload_deliverable(request, pk):
             proj.status = 'completed'
             proj.deliverable_unlocked = False  # Client must pay to unlock
             proj.save()
+            
+            # Handle multiple preview images if uploaded
+            from .models import ProjectImage
+            files = request.FILES.getlist('preview_images')
+            for f in files:
+                ProjectImage.objects.create(project=proj, image=f)
             messages.success(
                 request,
                 'Deliverable uploaded! The client will be able to download it after payment.'

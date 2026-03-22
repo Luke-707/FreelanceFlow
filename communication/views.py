@@ -38,12 +38,15 @@ def chat_detail(request, user_id):
     Message.objects.filter(sender=other_user, receiver=request.user, is_read=False).update(is_read=True)
 
     if request.method == 'POST':
-        form = MessageForm(request.POST)
+        form = MessageForm(request.POST, request.FILES)
         if form.is_valid():
             msg = form.save(commit=False)
             msg.sender = request.user
             msg.receiver = other_user
             msg.save()
+            from .models import MessageAttachment
+            for f in request.FILES.getlist('attachments'):
+                MessageAttachment.objects.create(message=msg, file=f)
             return redirect('chat_detail', user_id=user_id)
     else:
         form = MessageForm()
